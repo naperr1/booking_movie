@@ -10,13 +10,32 @@ const userShema = new Schema({
     type: String,
     required: true,
   },
-  fullName: { type: String },
-  dateOfBirth: { type: Date },
-  gender: { type: String, enum: ["male", "female", "other"] },
-  phoneNumber: { type: String },
-  address: { type: String },
-  password: { type: String, required: true },
-  bookings: [{ type: mongoose.Types.ObjectId, ref: "Booking" }],
+  fullName: {
+    type: String,
+  },
+  dateOfBirth: {
+    type: Date,
+  },
+  gender: {
+    type: String,
+    enum: ["male", "female", "other"],
+  },
+  phoneNumber: {
+    type: String,
+  },
+  address: {
+    type: String,
+  },
+  password: {
+    type: String,
+    required: true,
+  },
+  bookings: [
+    {
+      type: mongoose.Types.ObjectId,
+      ref: "Booking",
+    },
+  ],
 });
 
 export default mongoose.model("User", userShema);
