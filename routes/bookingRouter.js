@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  // deleteBooking,
   getBookingById,
   newBooking,
 } from "../controllers/bookingController.js";
