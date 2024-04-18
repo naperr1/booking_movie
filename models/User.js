@@ -12,9 +12,11 @@ const userShema = new Schema({
   },
   fullName: {
     type: String,
+    required: true,
   },
   dateOfBirth: {
-    type: Date,
+    type: String,
+    required: true,
   },
   gender: {
     type: String,
@@ -22,9 +24,11 @@ const userShema = new Schema({
   },
   phoneNumber: {
     type: String,
+    required: true,
   },
   address: {
     type: String,
+    required: true,
   },
   password: {
     type: String,

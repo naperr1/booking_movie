@@ -1,3 +1,4 @@
+import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 
@@ -19,7 +20,16 @@ export const getAllUsers = async (req, res, next) => {
 
 // Sign up
 export const signup = async (req, res, next) => {
-  const { username, email, password } = req.body;
+  const {
+    username,
+    email,
+    password,
+    dateOfBirth,
+    fullName,
+    gender,
+    phoneNumber,
+    address,
+  } = req.body;
 
   // Kiểm tra xem email hoặc username đã tồn tại trong cơ sở dữ liệu chưa
   const existingUser = await User.findOne({
@@ -33,13 +43,31 @@ export const signup = async (req, res, next) => {
   }
 
   // Nếu email và username chưa tồn tại, tiếp tục với quy trình đăng ký bình thường
-  if (!username.trim() || !email.trim() || !password.trim()) {
+  if (
+    !username.trim() ||
+    !email.trim() ||
+    !password.trim() ||
+    !dateOfBirth.trim() ||
+    !fullName.trim() ||
+    !gender.trim() ||
+    !phoneNumber.trim() ||
+    !address.trim()
+  ) {
     return res.status(422).json({ message: "Invalid Inputs" });
   }
 
   const hashedPassword = bcrypt.hashSync(password);
   try {
-    let user = new User({ username, email, password: hashedPassword });
+    let user = new User({
+      username,
+      email,
+      password: hashedPassword,
+      dateOfBirth,
+      fullName,
+      gender,
+      phoneNumber,
+      address,
+    });
     user = await user.save();
     if (!user) {
       return res.status(500).json({ message: "Unexpected Error Occurred" });
@@ -57,20 +85,21 @@ export const signup = async (req, res, next) => {
 // Login
 export const login = async (req, res, next) => {
   const { email, password } = req.body;
-  if (!email && email.trim() === "" && !password && password.trim() === "") {
+  if (!email || !password || email.trim() === "" || password.trim() === "") {
     return res.status(422).json({ message: "Invalid Inputs" });
   }
   let user;
   try {
     user = await User.findOne({ email });
   } catch (err) {
-    return console.log(err);
+    console.error(err);
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 
   if (!user) {
     return res
       .status(404)
-      .json({ message: "Unable to find user from this ID" });
+      .json({ message: "Unable to find user with this email" });
   }
 
   const isPasswordCorrect = bcrypt.compareSync(password, user.password);
@@ -79,7 +108,53 @@ export const login = async (req, res, next) => {
     return res.status(400).json({ message: "Incorrect Password" });
   }
 
-  return res.status(200).json({ message: "Login Successfull", user });
+  // Tạo JWT token
+  const token = jwt.sign({ email: user.email }, process.env.SECRET_KEY, {
+    expiresIn: "7d",
+  }); // Thay 'your_secret_key' bằng một chuỗi bí mật (secret) thực tế
+
+  // Trả về token cho client
+  return res.status(200).json({ message: "Login Successful", token });
+};
+
+// Login by token
+export const loginWithToken = async (req, res) => {
+  try {
+    // Lấy token từ header của request
+    const _token = req.headers.authorization || "";
+    const token = _token.split(" ")[1];
+
+    if (!token) {
+      return res
+        .status(401)
+        .json({ status: "error", message: "Token is missing" });
+    }
+
+    // Giải mã token
+    const decodedToken = jwt.verify(token, process.env.SECRET_KEY || "");
+    if (decodedToken && decodedToken.email) {
+      // Tìm kiếm người dùng bằng email từ token
+      const user = await User.findOne({ email: decodedToken.email });
+
+      if (!user) {
+        return res
+          .status(404)
+          .json({ status: "error", message: "User not found" });
+      }
+
+      return res.status(200).json({ status: "success", user });
+    } else {
+      console.error("Invalid token or email not found in token");
+      return res
+        .status(500)
+        .json({ status: "error", message: "Internal server error" });
+    }
+  } catch (error) {
+    console.error(error);
+    return res
+      .status(500)
+      .json({ status: "error", message: "Internal server error" });
+  }
 };
 
 // Get user by id
