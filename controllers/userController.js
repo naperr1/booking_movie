@@ -109,12 +109,19 @@ export const login = async (req, res, next) => {
   }
 
   // Tạo JWT token
-  const token = jwt.sign({ email: user.email }, process.env.SECRET_KEY, {
-    expiresIn: "7d",
-  }); // Thay 'your_secret_key' bằng một chuỗi bí mật (secret) thực tế
+  // const token = jwt.sign({ email: user.email }, process.env.SECRET_KEY, {
+  //   expiresIn: "7d",
+  // }); // Thay 'your_secret_key' bằng một chuỗi bí mật (secret) thực tế
+  const token = jwt.sign(
+    { id: user.id, email: user.email },
+    process.env.SECRET_KEY,
+    {
+      expiresIn: "7d",
+    }
+  );
 
   // Trả về token cho client
-  return res.status(200).json({ message: "Login Successful", token });
+  return res.status(200).json({ message: "Login Successful", user, token });
 };
 
 // Login by token
@@ -188,7 +195,69 @@ export const deleteUser = async (req, res, next) => {
 };
 
 // Update a user
-export const updateUser = async (req, res, next) => {
+// export const updateUser = async (req, res, next) => {
+//   const id = req.params.id;
+//   const {
+//     username,
+//     email,
+//     fullName,
+//     dateOfBirth,
+//     gender,
+//     phoneNumber,
+//     address,
+//     password,
+//   } = req.body;
+
+//   // Kiểm tra xem người dùng đã cung cấp ít nhất một trường thông tin mới để cập nhật
+//   if (
+//     !username &&
+//     !email &&
+//     !fullName &&
+//     !dateOfBirth &&
+//     !gender &&
+//     !phoneNumber &&
+//     !address &&
+//     !password
+//   ) {
+//     return res
+//       .status(422)
+//       .json({ message: "At least one field is required to update" });
+//   }
+
+//   // Hash mật khẩu mới nếu được cung cấp
+//   let hashedPassword;
+//   if (password) {
+//     hashedPassword = bcrypt.hashSync(password);
+//   }
+
+//   let user;
+//   try {
+//     // Xây dựng đối tượng chứa các trường thông tin mới được cập nhật
+//     const updatedFields = {};
+//     if (username) updatedFields.username = username;
+//     if (email) updatedFields.email = email;
+//     if (fullName) updatedFields.fullName = fullName;
+//     if (dateOfBirth) updatedFields.dateOfBirth = dateOfBirth;
+//     if (gender) updatedFields.gender = gender;
+//     if (phoneNumber) updatedFields.phoneNumber = phoneNumber;
+//     if (address) updatedFields.address = address;
+//     if (hashedPassword) updatedFields.password = hashedPassword;
+
+//     // Cập nhật người dùng trong cơ sở dữ liệu
+//     user = await User.findByIdAndUpdate(id, updatedFields, { new: true });
+//   } catch (err) {
+//     console.error(err);
+//     return res.status(500).json({ message: "Something went wrong" });
+//   }
+
+//   if (!user) {
+//     return res.status(500).json({ message: "User not found" });
+//   }
+
+//   res.status(200).json({ message: "Updated successfully", user: user });
+// };
+
+export const updateUser = async (req, res) => {
   const id = req.params.id;
   const {
     username,
@@ -217,14 +286,30 @@ export const updateUser = async (req, res, next) => {
       .json({ message: "At least one field is required to update" });
   }
 
-  // Hash mật khẩu mới nếu được cung cấp
-  let hashedPassword;
-  if (password) {
-    hashedPassword = bcrypt.hashSync(password);
-  }
-
-  let user;
   try {
+    // Xác thực token
+    const token =
+      req.headers.authorization && req.headers.authorization.split(" ")[1];
+    if (!token) {
+      return res.status(401).json({ message: "Token is missing" });
+    }
+
+    const decodedToken = jwt.verify(token, process.env.SECRET_KEY);
+    if (!decodedToken || !decodedToken.id) {
+      return res.status(403).json({ message: "Invalid token" });
+    }
+
+    // Kiểm tra quyền truy cập
+    if (decodedToken.id !== id) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    // Hash mật khẩu mới nếu được cung cấp
+    let hashedPassword;
+    if (password) {
+      hashedPassword = bcrypt.hashSync(password);
+    }
+
     // Xây dựng đối tượng chứa các trường thông tin mới được cập nhật
     const updatedFields = {};
     if (username) updatedFields.username = username;
@@ -237,15 +322,18 @@ export const updateUser = async (req, res, next) => {
     if (hashedPassword) updatedFields.password = hashedPassword;
 
     // Cập nhật người dùng trong cơ sở dữ liệu
-    user = await User.findByIdAndUpdate(id, updatedFields, { new: true });
+    const updatedUser = await User.findByIdAndUpdate(id, updatedFields, {
+      new: true,
+    });
+    if (!updatedUser) {
+      return res.status(500).json({ message: "User not found" });
+    }
+
+    res
+      .status(200)
+      .json({ message: "Updated successfully", user: updatedUser });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ message: "Something went wrong" });
   }
-
-  if (!user) {
-    return res.status(500).json({ message: "User not found" });
-  }
-
-  res.status(200).json({ message: "Updated successfully", user: user });
 };
