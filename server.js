@@ -21,9 +21,7 @@ app.use("/movie", movieRouter);
 app.use("/booking", bookingsRouter);
 
 mongoose
-  .connect(
-    `mongodb+srv://movieticket:movieticket@cluster0.i7ges50.mongodb.net/MOVIE_TICKET?retryWrites=true&w=majority&appName=Cluster0`
-  )
+  .connect(process.env.MONGOOSE_URL)
   .then(() => console.log("DB connection successful"))
   .catch((e) => console.log(e));
 
