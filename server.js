@@ -6,6 +6,8 @@ import cors from "cors";
 import adminRouter from "./routes/adminRouter.js";
 import movieRouter from "./routes/movieRouter.js";
 import bookingsRouter from "./routes/bookingRouter.js";
+import theaterRouter from "./routes/theaterRouter.js";
+import bookedSeatsRouter from "./routes/bookedSeats.js";
 
 dotenv.config();
 
@@ -19,6 +21,8 @@ app.use("/user", userRouter);
 app.use("/admin", adminRouter);
 app.use("/movie", movieRouter);
 app.use("/booking", bookingsRouter);
+app.use("/theater", theaterRouter);
+app.use("/bookedSeats", bookedSeatsRouter);
 
 mongoose
   .connect(
