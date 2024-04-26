@@ -124,19 +124,30 @@ export const updateBookedSeats = async (req, res) => {
                     .json({ status: "error", message: "User not found" });
             }
         }
+        const theater = await Theater.findById(theaterId);
 
         // Kiểm tra xem bookedSeats đã tồn tại chưa
         let bookedSeatsRecord = await BookedSeats.findOne({ movieId, showTime, theaterId });
 
         if (!bookedSeatsRecord) {
-            return res.status(404).json({ status: "error", message: "Booked seats not found" });
+            // Tạo mới bản ghi bookedSeats
+            const newBookedSeats = new BookedSeats({
+                movieId,
+                showTime,
+                bookedSeats,
+                theaterId,
+                cinemaLocation: theater.location
+            });
+
+            // Lưu bookedSeats vào cơ sở dữ liệu
+            await newBookedSeats.save();
+        } else {
+            // Cập nhật trường bookedSeats
+            bookedSeatsRecord.bookedSeats.push(...bookedSeats);
+
+            // Lưu cập nhật
+            await bookedSeatsRecord.save();
         }
-
-        // Cập nhật trường bookedSeats
-        bookedSeatsRecord.bookedSeats.push(...bookedSeats);
-
-        // Lưu cập nhật
-        await bookedSeatsRecord.save();
 
         res.status(200).json({ status: "success", message: "Booked seats updated successfully" });
     } catch (error) {

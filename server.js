@@ -8,6 +8,7 @@ import movieRouter from "./routes/movieRouter.js";
 import bookingsRouter from "./routes/bookingRouter.js";
 import theaterRouter from "./routes/theaterRouter.js";
 import bookedSeatsRouter from "./routes/bookedSeats.js";
+import voucherRouter from "./routes/voucherRouter.js";
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ app.use("/movie", movieRouter);
 app.use("/booking", bookingsRouter);
 app.use("/theater", theaterRouter);
 app.use("/bookedSeats", bookedSeatsRouter);
+app.use("/voucher", voucherRouter);
 
 mongoose
   .connect(process.env.MONGOOSE_URL)
