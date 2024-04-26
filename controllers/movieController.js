@@ -32,10 +32,13 @@ export const addMovie = async (req, res, next) => {
     genre,
     releaseDate,
     duration,
-    image,
     rating,
     cast,
     plot,
+    reviews,
+    ticketPrice,
+    theaters,
+    image,
   } = req.body;
 
   // Check for missing or empty required fields
@@ -50,11 +53,11 @@ export const addMovie = async (req, res, next) => {
     !duration ||
     !image ||
     image.trim() === "" ||
-    !rating ||
     !cast ||
     cast.length === 0 ||
     !plot ||
-    plot.trim() === ""
+    plot.trim() === "" ||
+    !ticketPrice
   ) {
     return res.status(422).json({ message: "Invalid Inputs" });
   }
@@ -67,10 +70,13 @@ export const addMovie = async (req, res, next) => {
       genre,
       releaseDate: new Date(releaseDate),
       duration,
-      image,
       rating,
       cast,
       plot,
+      reviews,
+      ticketPrice,
+      theaters,
+      image,
     });
 
     const session = await mongoose.startSession();
@@ -98,6 +104,72 @@ export const addMovie = async (req, res, next) => {
   }
 
   return res.status(201).json({ movie });
+};
+
+export const searchMovies = async (req, res) => {
+  try {
+    // Lấy từ khóa tìm kiếm từ yêu cầu của người dùng
+    const keyword = req.query.keyword;
+
+    // Kiểm tra xem từ khóa tìm kiếm có được cung cấp hay không
+    if (!keyword) {
+      return res.status(400).json({ message: "Keyword is required" });
+    }
+
+    // Tìm kiếm các bộ phim thỏa mãn từ khóa tìm kiếm
+    const movies = await Movie.find({
+      $or: [
+        { title: { $regex: keyword, $options: "i" } }, // Tìm kiếm theo tiêu đề không phân biệt hoa thường
+        { director: { $regex: keyword, $options: "i" } }, // Tìm kiếm theo đạo diễn không phân biệt hoa thường
+        { genre: { $regex: keyword, $options: "i" } }, // Tìm kiếm theo thể loại không phân biệt hoa thường
+        { cast: { $regex: keyword, $options: "i" } }, // Tìm kiếm theo diễn viên không phân biệt hoa thường
+        { plot: { $regex: keyword, $options: "i" } }, // Tìm kiếm theo nội dung không phân biệt hoa thường
+      ],
+    });
+
+    // Trả về kết quả cho người dùng
+    res.status(200).json({ movies });
+  } catch (error) {
+    // Xử lý lỗi nếu có
+    console.error("Error searching movies:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const sortMoviesByGenre = async (req, res) => {
+  try {
+    // Lấy danh sách các bộ phim và sắp xếp theo trường genre
+    const movies = await Movie.find().sort({ genre: 1 }); // Sắp xếp tăng dần theo trường genre
+
+    // Trả về kết quả cho người dùng
+    res.status(200).json({ movies });
+  } catch (error) {
+    // Xử lý lỗi nếu có
+    console.error("Error sorting movies by genre:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+export const filterMoviesByGenre = async (req, res) => {
+  try {
+    // Lấy giá trị của trường genre từ yêu cầu của người dùng
+    const { genre } = req.query;
+
+    // Kiểm tra xem trường genre có được cung cấp hay không
+    if (!genre) {
+      return res.status(400).json({ message: "Genre is required" });
+    }
+
+    // Thực hiện lọc theo trường genre
+    const movies = await Movie.find({ genre: genre });
+
+    // Trả về kết quả cho người dùng
+    res.status(200).json({ movies });
+  } catch (error) {
+    // Xử lý lỗi nếu có
+    console.error("Error filtering movies by genre:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
 };
 
 export const getAllMovies = async (req, res, next) => {
@@ -130,3 +202,64 @@ export const getMovieById = async (req, res, next) => {
 
   return res.status(200).json({ movie });
 };
+
+export const ratingMovie = async (req, res, next) => {
+  try {
+    const movieId = req.params.id;
+    const ratingValue = parseFloat(req.query.rating);
+
+    // Tìm bộ phim theo ID
+    const movie = await Movie.findById(movieId);
+
+    if (!movie) {
+      return res.status(404).json({ message: "Not found film" });
+    }
+
+    // Thêm lần rating mới vào mảng ratings của bộ phim
+    movie.ratings.push({ value: ratingValue });
+
+    // Lưu thay đổi vào cơ sở dữ liệu
+    await movie.save();
+
+    res.status(201).json({ message: "Rating Successfully", movie });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Rating Fail" });
+  }
+};
+
+export const reviewMovie = async (req, res, next) => {
+  try {
+    const movieId = req.params.id;
+    const reviewContent = req.query.content;
+
+    // Tìm bộ phim theo ID
+    const movie = await Movie.findById(movieId);
+
+    if (!movie) {
+      return res.status(404).json({ message: "Not found film" });
+    }
+
+    // Thêm đánh giá mới vào mảng reviews của bộ phim
+    movie.reviews.push({ content: reviewContent });
+
+    // Lưu thay đổi vào cơ sở dữ liệu
+    await movie.save();
+
+    res.status(201).json({ message: "Review Successfully", movie });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Review Fail" });
+  }
+};
+
+// Khi nào cần thì dùng
+// export const deleteAllMovies = async (req, res) => {
+//   try {
+//     await Movie.deleteMany({});
+//     res.status(200).json({ message: "All movie data deleted successfully." });
+//   } catch (error) {
+//     console.error("Error deleting movie data:", error);
+//     res.status(500).json({ message: "Error deleting movie data." });
+//   }
+// };
