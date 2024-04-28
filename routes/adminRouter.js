@@ -4,12 +4,14 @@ import {
   adminLogin,
   getAdminById,
   getAdmins,
+  addRandomTheatersToMovies,
 } from "../controllers/adminController.js";
 
 const adminRouter = express.Router();
 
 adminRouter.post("/signup", signUpAdmin);
 adminRouter.post("/login", adminLogin);
+adminRouter.post("/addRandomTheatersToMovies", addRandomTheatersToMovies);
 adminRouter.get("/", getAdmins);
 adminRouter.get("/:id", getAdminById);
 
