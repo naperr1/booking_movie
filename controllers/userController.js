@@ -24,11 +24,11 @@ export const signup = async (req, res, next) => {
     username,
     email,
     password,
-    dateOfBirth,
-    fullName,
-    gender,
-    phoneNumber,
-    address,
+    // dateOfBirth,
+    // fullName,
+    // gender,
+    // phoneNumber,
+    // address,
   } = req.body;
 
   // Kiểm tra xem email hoặc username đã tồn tại trong cơ sở dữ liệu chưa
@@ -46,12 +46,12 @@ export const signup = async (req, res, next) => {
   if (
     !username.trim() ||
     !email.trim() ||
-    !password.trim() ||
-    !dateOfBirth.trim() ||
-    !fullName.trim() ||
-    !gender.trim() ||
-    !phoneNumber.trim() ||
-    !address.trim()
+    !password.trim() 
+    // !dateOfBirth.trim() ||
+    // !fullName.trim() ||
+    // !gender.trim() ||
+    // !phoneNumber.trim() ||
+    // !address.trim()
   ) {
     return res.status(422).json({ message: "Invalid Inputs" });
   }
@@ -62,11 +62,11 @@ export const signup = async (req, res, next) => {
       username,
       email,
       password: hashedPassword,
-      dateOfBirth,
-      fullName,
-      gender,
-      phoneNumber,
-      address,
+      // dateOfBirth,
+      // fullName,
+      // gender,
+      // phoneNumber,
+      // address,
     });
     user = await user.save();
     if (!user) {
