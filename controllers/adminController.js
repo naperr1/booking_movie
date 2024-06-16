@@ -100,16 +100,16 @@ export const getAdminById = async (req, res, next) => {
 
 export async function addRandomTheatersToMovies(req, res, next) {
   const theatersList = [
-    "CGV Aeon Long Biên",
-    "CGV Hồ Gươm Plaza",
+    "CGV Aeon Long Bien",
+    "CGV Ho Guom Plaza",
     "CGV Rice City",
-    "CGV Vincom Center Bà Triệu",
-    "CGV Vincom Nguyễn Chí Thanh",
+    "CGV Vincom Center Ba Trieu",
+    "CGV Vincom Nguyen Chi Thanh",
     "CGV Vincom Royal City",
     "CGV Vincom Times City",
-    "CGV Vincom Long Biên",
-    "CGV Trương Định Plaza",
-    "CGV Tràng Tiền Plaza"
+    "CGV Vincom Long Bien",
+    "CGV Truong Dinh Plaza",
+    "CGV Trang Tien Plaza"
   ];
   try {
     // Lấy danh sách phim từ cơ sở dữ liệu
@@ -157,13 +157,25 @@ export async function addTheater(name, location) {
   }
 }
 
-// addTheater("CGV Aeon Long Biên", "Hà Nội");
-// addTheater("CGV Hồ Gươm Plaza", "Hà Nội");
-// addTheater("CGV Rice City", "Hồ Chí Minh");
-// addTheater("CGV Vincom Center Bà Triệu", "Hà Nội");
-// addTheater("CGV Vincom Nguyễn Chí Thanh", "Hà Nội");
-// addTheater("CGV Vincom Royal City", "Hà Nội");
-// addTheater("CGV Vincom Times City", "Hà Nội");
-// addTheater("CGV Vincom Long Biên", "Hà Nội");
-// addTheater("CGV Trương Định Plaza", "Hà Nội");
-// addTheater("CGV Tràng Tiền Plaza", "Hà Nội");
+// addTheater("CGV Aeon Long Bien", "Level 4 - AEON Mall Long Bien,27 Co Linh Street - Long Bien District");
+// addTheater("CGV Ho Guom Plaza", "110 Trần Phú Hanoi");
+// addTheater("CGV Rice City", "Level 2 & 4 - Central Building - Rice City Linh Dam,Hoang Liet Ward - Hoang Mai District Hà Noi");
+// addTheater("CGV Vincom Center Ba Trieu", "11Th Floor, 191 Ba Trieu Str Vincom B Bulding, Hà Nội, Hà Nội");
+// addTheater("CGV Vincom Nguyen Chi Thanh", "54a Nguyễn Chí Thanh, Q. Đống Đa, Tp. Hà Nội Hanoi");
+// addTheater("CGV Vincom Royal City", "72a Đ. Nguyễn Trãi, Thanh Xuân Trung, Thanh Xuân, Hà Nội");
+// addTheater("CGV Vincom Times City", "458 Minh Khai, Hai Bà Trưng Hanoi");
+// addTheater("CGV Vincom Long Bien", "Tầng 5, Khu đô thị Vinhomes Riverside, Long Biên");
+// addTheater("CGV Truong Dinh Plaza", "461 Đường Trương Định Tân Mai Hà Nội");
+// addTheater("CGV Trang Tien Plaza", "Hoan Kiem District,Trang Tien Plaza - 24 Hai Ba Trung Hà Noi ");
+
+// async function xoaHetDuLieu() {
+//   try {
+//       await Theater.deleteMany({});
+//       console.log("Đã xóa tất cả dữ liệu trong schema Ticket.");
+//   } catch (error) {
+//       console.error("Lỗi khi xóa dữ liệu:", error);
+//   }
+// }
+
+// // Sử dụng hàm xoaHetDuLieu
+// xoaHetDuLieu();
