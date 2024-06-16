@@ -4,17 +4,7 @@ import User from "../models/User.js";
 import Ticket from "../models/Ticket.js";
 
 export const newBooking = async (req, res, next) => {
-  const {
-    movieId,
-    userId,
-    seatNumbers,
-    ticketType,
-    price,
-    bookingDate,
-    cinemaLocation,
-    voucherId,
-    status,
-  } = req.body;
+  const { movieId, userId, seatNumbers, ticketType, price, bookingDate, cinemaLocation, voucherId, status } = req.body;
 
   try {
     // Kiểm tra xem movieId và userId có tồn tại không
@@ -28,10 +18,6 @@ export const newBooking = async (req, res, next) => {
     if (!existingUser) {
       return res.status(404).json({ message: "User Not Found With Given ID" });
     }
-
-    // Tạo một phiên giao dịch
-    const session = await mongoose.startSession();
-    session.startTransaction();
 
     // Tạo một đối tượng Ticket
     const ticket = new Ticket({
@@ -55,15 +41,7 @@ export const newBooking = async (req, res, next) => {
     existingMovie.bookings.push(ticket);
 
     // Lưu các thay đổi vào cơ sở dữ liệu
-    await Promise.all([
-      existingUser.save({ session }),
-      existingMovie.save({ session }),
-      ticket.save({ session }),
-    ]);
-
-    // Commit giao dịch
-    await session.commitTransaction();
-    session.endSession();
+    await Promise.all([existingUser.save({ session }), existingMovie.save({ session }), ticket.save({ session })]);
 
     // Trả về phản hồi thành công với thông tin ticket
     return res.status(201).json({ ticket });
