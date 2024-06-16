@@ -25,7 +25,6 @@ export const newBooking = async (req, res, next) => {
       movieName: existingMovie.title,
       movieImage: existingMovie.image,
       userId,
-      // Thêm userId vào trường user
       user: userId,
       seatNumbers,
       ticketType,
@@ -36,12 +35,8 @@ export const newBooking = async (req, res, next) => {
       status,
     });
 
-    // Thêm ticket vào danh sách booking của user và movie
-    existingUser.bookings.push(ticket);
-    existingMovie.bookings.push(ticket);
-
-    // Lưu các thay đổi vào cơ sở dữ liệu
-    await Promise.all([existingUser.save({ session }), existingMovie.save({ session }), ticket.save({ session })]);
+    // Lưu ticket vào cơ sở dữ liệu
+    await ticket.save();
 
     // Trả về phản hồi thành công với thông tin ticket
     return res.status(201).json({ ticket });
